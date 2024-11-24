@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useResult } from '@/store/use-result'
-import { Leaf } from 'lucide-react'
+import { Info, Leaf } from 'lucide-react'
 
 export const Summary = () => {
   const { result } = useResult()
@@ -20,14 +20,18 @@ export const Summary = () => {
     description:
       'A maçã é uma fruta pomácea da macieira, árvore da família Rosaceae. É um dos frutos mais cultivados no mundo.',
     funFacts: [
-      'As maçãs flutuam na água porque 25% do seu volume é ar.',
-      'Existem mais de 7.500 variedades de maçãs cultivadas no mundo.',
-      'A fobia de maçãs é chamada de malusdomesticaphobia.',
+      'Curiosidade 1',
+      'Curiosidade 2',
+      'Curiosidade 3',
+      'Curiosidade 4',
+      'Curiosidade 5',
     ],
     characteristics: [
-      'Rica em fibras e antioxidantes',
-      'Contém vitaminas C, K e potássio',
-      'Ajuda a regular o açúcar no sangue',
+      'Característica 1',
+      'Característica 2',
+      'Característica 3',
+      'Característica 4',
+      'Característica 5',
     ],
   }
 
@@ -45,7 +49,7 @@ export const Summary = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* <div>
+        <div>
           <h3 className="text-md font-medium mb-2 flex items-center gap-2">
             <Info className="w-4 h-4" />
             Curiosidades
@@ -67,7 +71,7 @@ export const Summary = () => {
               <li key={index}>{char}</li>
             ))}
           </ul>
-        </div> */}
+        </div>
       </CardContent>
     </Card>
   )
