@@ -1,12 +1,10 @@
 FROM node:20-alpine
 
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     python3 \
-    python3-pip \
+    py3-pip \
     g++ \
-    make \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    make
 
 WORKDIR /app
 
