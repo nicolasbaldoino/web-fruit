@@ -45,9 +45,10 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 export const ImageIdentifier = () => {
+  const { setResult } = useResult()
+
   const [preview, setPreview] = React.useState<string>('')
   const [loading, setLoading] = React.useState(false)
-  const { result, setResult } = useResult()
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -183,11 +184,12 @@ export const ImageIdentifier = () => {
                     'Identificar Imagem'
                   )}
                 </Button>
-                {result && (
+                {preview && (
                   <Button
                     type="button"
                     className="w-full"
                     variant="secondary"
+                    disabled={loading}
                     onClick={() => {
                       setPreview('')
                       setResult('')
