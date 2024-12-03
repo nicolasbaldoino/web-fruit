@@ -1,19 +1,20 @@
 'use server'
 
 import { google } from '@ai-sdk/google'
-import { generateObject } from 'ai'
+import { streamObject } from 'ai'
+import { createStreamableValue } from 'ai/rsc'
 import { z } from 'zod'
 
 const schema = z.object({
   name: z.string(),
-  description: z.string(),
-  funFacts: z.array(z.string()),
-  characteristics: z.array(z.string()),
+  aDescription: z.string(),
+  bFunFacts: z.array(z.string()),
+  cCharacteristics: z.array(z.string()),
 })
 
 export type SummaryType = z.infer<typeof schema>
 
-const summaryPrompt = (name: string) => `
+const prompt = (name: string) => `
 Gere um resumo sobre a fruta ou vegetal chamada "${name}", incluindo 5 curiosidades e 5 características.
 O resumo deve ser organizado nas seguintes seções:
 
@@ -48,15 +49,29 @@ Características:
 5. As bananas possuem uma polpa doce e macia, com uma casca amarela quando maduras.
 `
 
-export const summary = async (result: string) => {
-  const res = await generateObject({
-    model: google('gemini-1.5-pro-latest', {
-      structuredOutputs: true,
-    }),
-    schemaName: 'fruitOrVegetable',
-    schema,
-    prompt: summaryPrompt(result),
-  })
+export const generateSummary = async (result: string) => {
+  'use server'
 
-  return res.object
+  const stream = createStreamableValue()
+
+  ;(async () => {
+    const { partialObjectStream } = streamObject({
+      model: google('gemini-1.5-pro-latest', {
+        structuredOutputs: true,
+      }),
+      schemaName: 'fruitOrVegetable',
+      schema,
+      prompt: prompt(result),
+      temperature: 1.0,
+      topP: 1,
+    })
+
+    for await (const partialObject of partialObjectStream) {
+      stream.update(partialObject)
+    }
+
+    stream.done()
+  })()
+
+  return { object: stream.value }
 }

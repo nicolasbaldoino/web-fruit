@@ -1,6 +1,6 @@
 'use client'
 
-import { summary, SummaryType } from '@/actions/summary'
+import { generateSummary, SummaryType } from '@/actions/generate-summary'
 import {
   Card,
   CardContent,
@@ -10,21 +10,30 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useResult } from '@/store/use-result'
+import { readStreamableValue } from 'ai/rsc'
 import { Info, Leaf, Wand2 } from 'lucide-react'
 import React from 'react'
 
 export const Summary = () => {
   const { result } = useResult()
 
-  const [data, setData] = React.useState<SummaryType | null>(null)
+  const [data, setData] = React.useState<Partial<SummaryType> | null>(null)
+  const [loading, setLoading] = React.useState(false)
 
   const fetchSummary = async () => {
     try {
-      const data = await summary(result)
+      setLoading(true)
+      const { object } = await generateSummary(result)
 
-      setData(data)
+      for await (const partialObject of readStreamableValue(object)) {
+        if (partialObject) {
+          setData(partialObject)
+        }
+      }
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -44,8 +53,8 @@ export const Summary = () => {
           <h1 className="text-xl font-semibold">Informações sobre {result}</h1>
         </CardTitle>
         <CardDescription className="flex flex-col justify-center items-center text-center text-sm">
-          {data?.description}
-          {!data?.description && (
+          {data?.aDescription}
+          {!data?.aDescription && (
             <>
               <Skeleton className="h-5 w-full my-[0.2rem]" />
               <Skeleton className="h-5 w-full my-[0.2rem]" />
@@ -61,11 +70,11 @@ export const Summary = () => {
               <Info className="w-4 h-4" />
               Curiosidades
             </div>
-            {!data?.description && <Wand2 className="w-4 h-4 animate-pulse" />}
+            {loading && <Wand2 className="w-4 h-4 animate-pulse" />}
           </h3>
           <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-            {data?.funFacts.map((fact, index) => <li key={index}>{fact}</li>)}
-            {!data?.funFacts.length &&
+            {data?.bFunFacts?.map((fact, index) => <li key={index}>{fact}</li>)}
+            {!data?.bFunFacts?.length &&
               Array.from({ length: 5 }).map((_, index) => (
                 <li key={index} className="flex">
                   <Skeleton className="h-5 w-full my-[0.1rem]" />
@@ -80,13 +89,13 @@ export const Summary = () => {
               <Leaf className="w-4 h-4" />
               Características
             </div>
-            {!data?.description && <Wand2 className="w-4 h-4 animate-pulse" />}
+            {loading && <Wand2 className="w-4 h-4 animate-pulse" />}
           </h3>
           <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-            {data?.characteristics.map((char, index) => (
+            {data?.cCharacteristics?.map((char, index) => (
               <li key={index}>{char}</li>
             ))}
-            {!data?.characteristics.length &&
+            {!data?.cCharacteristics?.length &&
               Array.from({ length: 5 }).map((_, index) => (
                 <li key={index} className="flex">
                   <Skeleton className="h-5 w-full my-[0.1rem]" />
